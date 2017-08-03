@@ -12,7 +12,11 @@ app.set('view engine', 'mustache')
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended:false}))
 app.use(expressValidator())
-app.use(expressSession({secret: "abcdefg"}))
+app.use(expressSession({
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: true }}))
 app.use(express.static(path.join(__dirname, 'static')))
 
 var username = 'foo'
@@ -21,10 +25,12 @@ var password = 'bar'
 //verify logged in:
 function isLoggedIn(req, res, next) {
   if (req.session.isLoggedIn) {
+    console.log("you are in if logged in")
     return next();
   }
   //if not logged in rediret to login page:
   else {
+    console.log ("you are in not logged in redirect")
     res.redirect('/login');
   }
 }
@@ -32,7 +38,6 @@ function isLoggedIn(req, res, next) {
 app.get("/", isLoggedIn, function(req, res, next){
   res.render('index', req.session)
 });
-
 
 //Why doesn't this validation work?
 
@@ -42,7 +47,7 @@ app.get("/", isLoggedIn, function(req, res, next){
 //      if (true){
 //    req.checkbody(password).isIn(password, 'bar');
 //    if (true){
-//      then res.redirect('/index');
+//      then res.redirect('index');
 //    }else{
 //     errorMessage: "Invalid Username/password";
 //   }}
@@ -62,7 +67,6 @@ app.post("/user/add", function(req, res, next){
       console.log(users)
       res.render("/login", {erros: errors})
       //return;
-      //change the .send to put a message
       //on the login page that there is an error
     } else {
       users.push({
